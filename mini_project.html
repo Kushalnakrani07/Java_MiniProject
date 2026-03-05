@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 30px;
+        }
+
+        .word-display {
+            background-color: #2a2a2a;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .word {
+            font-size: 36px;
+            color: #ffffff;
+        }
+
+        .input-area {
+            width: 100%;
+            padding: 15px;
+            font-size: 24px;
+            background-color: #2a2a2a;
+            color: #ffffff;
+            border: 2px solid #444;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .input-area:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 18px;
+            background-color: #4a9eff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background-color: #3a8eef;
+        }
+
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        .results {
+            background-color: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-item {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .info {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .correct {
+            color: #4a9eff;
+        }
+
+        .incorrect {
+            color: #ff4a4a;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Typing Speed Test</h1>
+
+    <div class="info">
+        <div>Test will show one word at a time. Type each word correctly and press space to continue.</div>
+    </div>
+
+    <div class="word-display">
+        <div class="word" id="currentWord">Press Start to begin</div>
+    </div>
+
+    <input type="text" class="input-area" id="inputBox" placeholder="Type the word here..." disabled>
+
+    <button id="startBtn">Start Test</button>
+
+    <div class="results" id="results">
+        <div class="result-item">Total Time Taken: <span id="timeTaken"></span></div>
+        <div class="result-item">Words Typed: <span id="wordsTyped"></span></div>
+        <div class="result-item">Correct Words: <span id="correctWords"></span></div>
+        <div class="result-item">Accuracy: <span id="accuracy"></span></div>
+        <div class="result-item">Speed: <span id="speed"></span></div>
+    </div>
+</div>
+
+<script>
+    var words = [
+        "the", "be", "to", "of", "and", "a", "in", "that", "have", "I",
+        "it", "for", "not", "on", "with", "he", "as", "you", "do", "at",
+        "this", "but", "his", "by", "from", "they", "we", "say", "her", "she",
+        "or", "an", "will", "my", "one", "all", "would", "there", "their", "what",
+        "so", "up", "out", "if", "about", "who", "get", "which", "go", "me"
+    ];
+
+    var currentWordIndex = 0;
+    var startTime;
+    var endTime;
+    var isTestRunning = false;
+    var correctCount = 0;
+    var incorrectCount = 0;
+    var totalWords = 0;
+    var testWords = [];
+
+    var startBtn = document.getElementById('startBtn');
+    var inputBox = document.getElementById('inputBox');
+    var currentWordElement = document.getElementById('currentWord');
+    var resultsDiv = document.getElementById('results');
+
+    startBtn.addEventListener('click', function() {
+        startTest();
+    });
+
+    inputBox.addEventListener('keypress', function(event) {
+        if (event.key === ' ') {
+            event.preventDefault();
+            checkWord();
+        }
+    });
+
+    function startTest() {
+        currentWordIndex = 0;
+        correctCount = 0;
+        incorrectCount = 0;
+        totalWords = 0;
+        isTestRunning = true;
+
+        resultsDiv.classList.remove('show');
+
+        testWords = [];
+        for (var i = 0; i < 50; i++) {
+            var randomIndex = Math.floor(Math.random() * words.length);
+            testWords.push(words[randomIndex]);
+        }
+
+        inputBox.value = '';
+        inputBox.disabled = false;
+        inputBox.focus();
+        startBtn.disabled = true;
+
+        startTime = new Date();
+
+        showNextWord();
+    }
+
+    function showNextWord() {
+        if (currentWordIndex < testWords.length) {
+            currentWordElement.textContent = testWords[currentWordIndex];
+            currentWordElement.className = 'word';
+        } else {
+            endTest();
+        }
+    }
+
+    function checkWord() {
+        var typedWord = inputBox.value.trim();
+        var correctWord = testWords[currentWordIndex];
+
+        totalWords++;
+
+        if (typedWord === correctWord) {
+            correctCount++;
+            currentWordElement.classList.add('correct');
+        } else {
+            incorrectCount++;
+            currentWordElement.classList.add('incorrect');
+        }
+
+        setTimeout(function() {
+            inputBox.value = '';
+            currentWordIndex++;
+            showNextWord();
+        }, 100);
+    }
+
+    function endTest() {
+        endTime = new Date();
+        isTestRunning = false;
+        inputBox.disabled = true;
+        startBtn.disabled = false;
+
+        calculateResults();
+    }
+
+    function calculateResults() {
+        var timeDiff = endTime - startTime;
+        var minutes = timeDiff / 1000 / 60;
+        var seconds = Math.floor((timeDiff / 1000) % 60);
+
+        var totalMinutes = Math.floor(minutes);
+        var displaySeconds = seconds;
+
+        var timeString = '';
+        if (totalMinutes > 0) {
+            timeString = totalMinutes + ' minute';
+            if (totalMinutes > 1) {
+                timeString += 's';
+            }
+            if (displaySeconds > 0) {
+                timeString += ' ' + displaySeconds + ' seconds';
+            }
+        } else {
+            timeString = displaySeconds + ' seconds';
+        }
+
+        var accuracyPercent = 0;
+        if (totalWords > 0) {
+            accuracyPercent = Math.round((correctCount / totalWords) * 100);
+        }
+
+        var totalChars = 0;
+        for (var i = 0; i < correctCount; i++) {
+            totalChars += testWords[i].length;
+        }
+
+        var charsPerMinute = 0;
+        if (minutes > 0) {
+            charsPerMinute = Math.round(totalChars / minutes);
+        }
+
+        document.getElementById('timeTaken').textContent = timeString;
+        document.getElementById('wordsTyped').textContent = totalWords;
+        document.getElementById('correctWords').textContent = correctCount;
+        document.getElementById('accuracy').textContent = accuracyPercent + '%';
+        document.getElementById('speed').textContent = charsPerMinute + ' characters per minute';
+
+        resultsDiv.classList.add('show');
+        currentWordElement.textContent = 'Test Complete! Press Start to try again';
+    }
+</script>
+</body>
+</html>
