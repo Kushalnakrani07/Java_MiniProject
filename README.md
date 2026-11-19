@@ -1,1 +1,1 @@
-# Java_MiniProject
+# JavaScript_MiniProject
